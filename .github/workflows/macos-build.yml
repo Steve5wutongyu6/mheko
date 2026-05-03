@@ -36,6 +36,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+          cache-dependency-path: .github/requirements/macos-build.txt
 
       - name: Restore Homebrew downloads
         uses: actions/cache@v4
@@ -49,7 +50,9 @@ jobs:
         run: brew install pkg-config ccache openssl@3
 
       - name: Install aqtinstall
-        run: python -m pip install --upgrade pip aqtinstall
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r .github/requirements/macos-build.txt
 
       - name: Restore Qt SDK cache
         id: cache-qt
@@ -87,7 +90,7 @@ jobs:
           OPENSSL_ROOT_DIR: ${{ runner.temp }}/openssl-root
         run: |
           mkdir -p "$CCACHE_DIR"
-          ccache --zero-stats || true
+          command -v ccache >/dev/null 2>&1 && ccache --zero-stats || true
           OPENSSL_PREFIX="$(brew --prefix openssl@3)"
           mkdir -p "$OPENSSL_ROOT_DIR"
           ln -sfn "$OPENSSL_PREFIX/include" "$OPENSSL_ROOT_DIR/include"
@@ -97,7 +100,7 @@ jobs:
 
       - name: Show ccache stats
         if: always()
-        run: ccache --show-stats || true
+        run: command -v ccache >/dev/null 2>&1 && ccache --show-stats || true
 
       - name: Package app bundle
         run: ditto -c -k --sequesterRsrc --keepParent mheko.app mheko-macos-${{ github.sha }}.zip
