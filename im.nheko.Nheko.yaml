@@ -1,5 +1,5 @@
-id: im.nheko.Nheko
-command: im.nheko.Nheko
+id: im.mheko.Mheko
+command: im.mheko.Mheko
 runtime: org.kde.Platform
 runtime-version: '6.10'
 sdk: org.kde.Sdk
@@ -192,7 +192,7 @@ modules:
         #tag: v0.10.1
         type: git
         url: https://github.com/Nheko-Reborn/mtxclient.git
-  - name: nheko
+  - name: mheko
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DLMDBXX_INCLUDE_DIR=.deps/lmdbxx

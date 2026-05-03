@@ -76,7 +76,7 @@ stacktraceHandler(int signum)
     fprintf(stderr, "Error: signal %d:\n", signum);
     backtrace_symbols_fd(array, size, STDERR_FILENO);
 
-    int file = ::open("/tmp/nheko-crash.dump",
+    int file = ::open("/tmp/mheko-crash.dump",
                       O_CREAT | O_WRONLY | O_TRUNC
 #if defined(S_IWUSR) && defined(S_IRUSR)
                       ,
@@ -155,9 +155,9 @@ createStandardDirectory(QStandardPaths::StandardLocation path)
 int
 main(int argc, char *argv[])
 {
-    QCoreApplication::setApplicationName(QStringLiteral("nheko"));
+    QCoreApplication::setApplicationName(QStringLiteral("mheko"));
     QCoreApplication::setApplicationVersion(nheko::version);
-    QCoreApplication::setOrganizationName(QStringLiteral("nheko"));
+    QCoreApplication::setOrganizationName(QStringLiteral("mheko"));
 
     // Disable the qml disk cache by default to prevent crashes on updates. See
     // https://github.com/Nheko-Reborn/nheko/issues/1383
@@ -218,7 +218,7 @@ main(int argc, char *argv[])
     QCommandLineOption configName(
       QStringList() << QStringLiteral("p") << QStringLiteral("profile"),
       QCoreApplication::tr("Create a unique profile which allows you to log into several "
-                           "accounts at the same time and start multiple instances of nheko."),
+                           "accounts at the same time and start multiple instances of mheko."),
       QCoreApplication::tr("profile"),
       QCoreApplication::tr("profile name"));
     parser.addOption(configName);
@@ -238,7 +238,7 @@ main(int argc, char *argv[])
     auto profileName = settings.lock()->profile();
 
     KDSingleApplication singleapp(
-      QStringLiteral("im.nheko.nheko-%1")
+      QStringLiteral("im.mheko.mheko-%1")
         .arg(profileName == QLatin1String("default") ? QLatin1String("") : profileName));
 
     // This check needs to happen _after_ process(), so that we actually print help for --help when
@@ -303,12 +303,12 @@ main(int argc, char *argv[])
     }
 
 #if !defined(Q_OS_MACOS)
-    app.setWindowIcon(QIcon::fromTheme(QStringLiteral("nheko"), QIcon{":/logos/nheko.png"}));
+    app.setWindowIcon(QIcon::fromTheme(QStringLiteral("mheko"), QIcon{":/logos/nheko.png"}));
 #endif
 #ifdef NHEKO_FLATPAK
-    app.setDesktopFileName(QStringLiteral("im.nheko.Nheko"));
+    app.setDesktopFileName(QStringLiteral("im.mheko.Mheko"));
 #else
-    app.setDesktopFileName(QStringLiteral("nheko"));
+    app.setDesktopFileName(QStringLiteral("mheko"));
 #endif
 
     http::init();
@@ -346,7 +346,7 @@ main(int argc, char *argv[])
         bool to_stderr = bool(targets.removeAll("stderr"));
         QString path   = targets.removeAll("file")
                            ? QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
-                               .filePath("nheko.log")
+                               .filePath("mheko.log")
                            : QLatin1String("");
         if (!targets.isEmpty()) {
             std::cerr << "Invalid log type '" << targets.first().toStdString().c_str() << "'"
@@ -409,7 +409,7 @@ main(int argc, char *argv[])
                            QStringLiteral(":/translations")))
         app.installTranslator(&appTranslator);
     else
-        qDebug() << "Failed to load nheko translations";
+        qDebug() << "Failed to load application translations";
 
     MainWindow w(nullptr);
     // QQuickView w;
@@ -476,7 +476,7 @@ main(int argc, char *argv[])
     NotificationsManager::attachToMacNotifCenter();
 #endif
 
-    nhlog::ui()->info("starting nheko {}", nheko::version);
+    nhlog::ui()->info("starting mheko {}", nheko::version);
 
     auto returnvalue = app.exec();
 

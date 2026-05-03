@@ -33,10 +33,10 @@ release:
 	@cmake --build build
 
 linux-install:
-	cp -f nheko*.AppImage ~/.local/bin
+	cp -f mheko*.AppImage ~/.local/bin
 
 macos-app-install:
-	cp -Rf build/nheko.app /Applications
+	cp -Rf build/mheko.app /Applications
 
 lint:
 	./.ci/format.sh

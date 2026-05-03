@@ -15,7 +15,7 @@ class RoomlistModel;
 class NhekoDBusBackend final : public QObject
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "im.nheko.Nheko")
+    Q_CLASSINFO("D-Bus Interface", "im.mheko.Mheko")
 
 public:
     NhekoDBusBackend(RoomlistModel *parent);

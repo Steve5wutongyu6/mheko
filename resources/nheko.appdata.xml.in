@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2020-2022 mujx, nheko reborn developers -->
 <component type="desktop">
-  <id>im.nheko.Nheko</id>
+  <id>im.mheko.Mheko</id>
   <launchable type="desktop-id">@APPID@.desktop</launchable>
-  <replaces>
-    <id>io.github.NhekoReborn.Nheko</id>
-  </replaces>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
-  <developer id="im.nheko">
+  <developer id="im.mheko">
     <name>Nheko Reborn</name>
   </developer>
-  <name>nheko</name>
+  <name>mheko</name>
   <summary>Desktop client for the Matrix protocol</summary>
   <description>
     <p>The motivation behind the project is to provide a native

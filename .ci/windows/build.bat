@@ -27,18 +27,18 @@ nmake
 cd ..
 
 :: create zip bundle
-mkdir NhekoRelease
-copy build\Release\nheko.exe NhekoRelease\nheko.exe
-copy qt-jdenticon\release\qtjdenticon0.dll NhekoRelease\qtjdenticon.dll
-copy build\_deps\cmark-build\src\Release\cmark.dll NhekoRelease\cmark.dll
-windeployqt --qmldir resources\qml\ NhekoRelease\nheko.exe
+mkdir MhekoRelease
+copy build\Release\mheko.exe MhekoRelease\mheko.exe
+copy qt-jdenticon\release\qtjdenticon0.dll MhekoRelease\qtjdenticon.dll
+copy build\_deps\cmark-build\src\Release\cmark.dll MhekoRelease\cmark.dll
+windeployqt --qmldir resources\qml\ MhekoRelease\mheko.exe
 
-7z a nheko_win_64.zip .\NhekoRelease\*
+7z a mheko_win_64.zip .\MhekoRelease\*
 
 
 :: create msix
 mkdir msix
-xcopy .\NhekoRelease\*.* msix\*.* /s /e /c /y
+xcopy .\MhekoRelease\*.* msix\*.* /s /e /c /y
 copy .\resources\nheko.png msix
 copy .\resources\nheko.png msix\nheko_altform-unplated.png
 copy .\resources\nheko-44.png msix\nheko-44.png
@@ -59,5 +59,5 @@ makepri new /pr . /cf priconfig.xml
 cd ..
 
 :: Build the msix
-makeappx pack -d msix -p nheko.msix
+makeappx pack -d msix -p mheko.msix
 

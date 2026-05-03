@@ -20,25 +20,25 @@ if [ -n "${CI_PIPELINE_TRIGGERED:-}" ] && [ "${TRIGGERED_BY:-}" = "cirrus" ]; th
   curl "https://api.cirrus-ci.com/v1/artifact/build/${TRIGGER_BUILD_ID}/binaries.zip" -o binaries.zip
   # cirrus ci artifacts task name is 'binaries' so that's the zip name.
   unzip binaries.zip
-  # we zip 'build/nheko.app' in cirrus ci, cirrus itself puts it in a 'build' directory
+  # we zip 'build/mheko.app' in cirrus ci, cirrus itself puts it in a 'build' directory
   # so move it to the right place for the rest of the process.
-  unzip nheko.zip
+  unzip mheko.zip
 fi
 
-if [ ! -d "nheko.app" ]; then
-  echo "nheko.app is missing, you did something wrong!"
+if [ ! -d "mheko.app" ]; then
+  echo "mheko.app is missing, you did something wrong!"
   exit 1
 fi
 
 echo "[INFO] Signing app contents"
-find "nheko.app/Contents"|while read -r fname; do
+find "mheko.app/Contents"|while read -r fname; do
     if [ -f "$fname" ]; then
         echo "[INFO] Signing $fname"
         codesign --force --timestamp --options=runtime --sign "${APPLE_DEV_IDENTITY}" "$fname"
     fi
 done
 
-codesign --force --timestamp --options=runtime --sign "${APPLE_DEV_IDENTITY}" "nheko.app"
+codesign --force --timestamp --options=runtime --sign "${APPLE_DEV_IDENTITY}" "mheko.app"
 
 NOTARIZE_SUBMIT_LOG=$(mktemp /tmp/notarize-submit.XXXXXX)
 NOTARIZE_STATUS_LOG=$(mktemp /tmp/notarize-status.XXXXXX)
@@ -48,15 +48,15 @@ finish() {
 }
 trap finish EXIT
 
-dmgbuild -s .ci/macos/settings.json "Nheko" nheko.dmg
-codesign -s "${APPLE_DEV_IDENTITY}" nheko.dmg
+dmgbuild -s .ci/macos/settings.json "mheko" mheko.dmg
+codesign -s "${APPLE_DEV_IDENTITY}" mheko.dmg
 
 user=$(id -nu)
-chown "${user}" nheko.dmg
+chown "${user}" mheko.dmg
 
 echo "--> Start Notarization process"
-# OLD altool usage: xcrun altool -t osx -f nheko.dmg --primary-bundle-id "io.github.nheko-reborn.nheko" --notarize-app -u "${APPLE_DEV_USER}" -p "${APPLE_DEV_PASS}" > "$NOTARIZE_SUBMIT_LOG" 2>&1
-xcrun notarytool submit nheko.dmg --apple-id "${APPLE_DEV_USER}" --password "${APPLE_DEV_PASS}" --team-id "${APPLE_TEAM_ID}" > "$NOTARIZE_SUBMIT_LOG" 2>&1
+# OLD altool usage: xcrun altool -t osx -f mheko.dmg --primary-bundle-id "im.mheko.Mheko" --notarize-app -u "${APPLE_DEV_USER}" -p "${APPLE_DEV_PASS}" > "$NOTARIZE_SUBMIT_LOG" 2>&1
+xcrun notarytool submit mheko.dmg --apple-id "${APPLE_DEV_USER}" --password "${APPLE_DEV_PASS}" --team-id "${APPLE_TEAM_ID}" > "$NOTARIZE_SUBMIT_LOG" 2>&1
 # OLD altool usage: requestUUID="$(awk -F ' = ' '/RequestUUID/ {print $2}' "$NOTARIZE_SUBMIT_LOG")"
 requestUUID="$(awk -F ': ' '/id/ {print $2}' "$NOTARIZE_SUBMIT_LOG" | head -1)"
 
@@ -81,7 +81,7 @@ while sleep 60 && date; do
 
   if [ "${sub_status}" = "Accepted" ]; then
       echo "Notarization done!"
-      xcrun stapler staple -v nheko.dmg
+      xcrun stapler staple -v mheko.dmg
       echo "Stapler done!"
       break
   fi
@@ -97,7 +97,7 @@ done
 VERSION=${CI_COMMIT_SHORT_SHA}
 
 if [ -n "$VERSION" ]; then
-    mv nheko.dmg "nheko-${VERSION}-${PLAT}.dmg"
+    mv mheko.dmg "mheko-${VERSION}-${PLAT}.dmg"
     mkdir -p artifacts
-    cp "nheko-${VERSION}-${PLAT}.dmg" artifacts/
+    cp "mheko-${VERSION}-${PLAT}.dmg" artifacts/
 fi

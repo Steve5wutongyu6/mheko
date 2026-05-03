@@ -2421,7 +2421,7 @@ try {
                                   AccountDataEvent<
                                     mtx::events::account_data::nheko_extensions::HiddenEvents>>) {
                       if (!event.content.hidden_event_types) {
-                          accountDataDb.del(txn, "im.nheko.hidden_events");
+                          accountDataDb.del(txn, "im.mheko.hidden_events");
                           return;
                       }
                   }
@@ -2545,7 +2545,7 @@ try {
                                       AccountDataEvent<mtx::events::account_data::nheko_extensions::
                                                          HiddenEvents>>) {
                           if (!event.content.hidden_event_types) {
-                              accountDataDb.del(txn, "im.nheko.hidden_events");
+                              accountDataDb.del(txn, "im.mheko.hidden_events");
                               return;
                           }
                       }

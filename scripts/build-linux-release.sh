@@ -4,8 +4,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${BUILD_DIR:-${ROOT_DIR}/build/linux-release}"
-ARTIFACT_DIR="${ARTIFACT_DIR:-${ROOT_DIR}/artifacts/nheko-linux}"
-ARCHIVE_PATH="${ARCHIVE_PATH:-${ROOT_DIR}/artifacts/nheko-linux.tar.gz}"
+ARTIFACT_DIR="${ARTIFACT_DIR:-${ROOT_DIR}/artifacts/mheko-linux}"
+ARCHIVE_PATH="${ARCHIVE_PATH:-${ROOT_DIR}/artifacts/mheko-linux.tar.gz}"
 QT_VERSION="${QT_VERSION:-6.8.3}"
 QT_ROOT="${QT_ROOT:-${HOME}/Qt/${QT_VERSION}/gcc_64}"
 

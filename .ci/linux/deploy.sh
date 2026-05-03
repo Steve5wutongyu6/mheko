@@ -2,7 +2,7 @@
 
 set -ex
 
-APP=nheko
+APP=mheko
 DIR=${APP}.AppDir
 # unused but may be useful...
 #TAG=$(git tag -l --points-at HEAD)
@@ -14,14 +14,14 @@ do
 done
 
 # Copy resources.
-cp build/nheko ${DIR}/usr/bin
-cp resources/nheko.desktop ${DIR}/usr/share/applications/nheko.desktop
-cp resources/nheko.png ${DIR}/usr/share/pixmaps/nheko.png
+cp build/mheko ${DIR}/usr/bin
+cp build/resources/mheko.desktop ${DIR}/usr/share/applications/mheko.desktop
+cp resources/nheko.png ${DIR}/usr/share/pixmaps/mheko.png
 
 for iconSize in 16 32 48 64 128 256 512; do
     IconDir=${DIR}/usr/share/icons/hicolor/${iconSize}x${iconSize}/apps
     mkdir -p ${IconDir}
-    cp resources/nheko-${iconSize}.png ${IconDir}/nheko.png
+    cp resources/nheko-${iconSize}.png ${IconDir}/mheko.png
 done
 
 # Only download the file when not already present
@@ -46,13 +46,13 @@ done
 
 ./"$linuxdeployqt" ${DIR}/usr/share/applications/*.desktop -unsupported-allow-new-glibc -bundle-non-qt-libs -qmldir=./resources/qml -appimage
 
-chmod +x nheko-*x86_64.AppImage
+chmod +x mheko-*x86_64.AppImage
 
 mkdir artifacts
-cp nheko-*x86_64.AppImage artifacts/
+cp mheko-*x86_64.AppImage artifacts/
 
 if [ -n "$VERSION" ]; then
     # commented out for now, as AppImage file appears to already contain the version.
-    #mv nheko-*x86_64.AppImage nheko-${VERSION}-x86_64.AppImage
-    echo "nheko-${VERSION}-x86_64.AppImage"
+    #mv mheko-*x86_64.AppImage mheko-${VERSION}-x86_64.AppImage
+    echo "mheko-${VERSION}-x86_64.AppImage"
 fi

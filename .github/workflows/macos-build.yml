@@ -79,7 +79,7 @@ jobs:
             ${{ runner.os }}-ccache-${{ github.ref_name }}-
             ${{ runner.os }}-ccache-
 
-      - name: Build nheko.app
+      - name: Build mheko.app
         env:
           NHEKO_QT_ROOT: $HOME/Qt/${{ env.QT_VERSION }}/macos
           NHEKO_HUNTER_ROOT: $HOME/.hunter
@@ -100,14 +100,14 @@ jobs:
         run: ccache --show-stats || true
 
       - name: Package app bundle
-        run: ditto -c -k --sequesterRsrc --keepParent nheko.app nheko-macos-${{ github.sha }}.zip
+        run: ditto -c -k --sequesterRsrc --keepParent mheko.app mheko-macos-${{ github.sha }}.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nheko-macos-${{ github.sha }}
+          name: mheko-macos-${{ github.sha }}
           path: |
-            nheko.app
-            nheko-macos-${{ github.sha }}.zip
+            mheko.app
+            mheko-macos-${{ github.sha }}.zip
           if-no-files-found: error
           retention-days: 14

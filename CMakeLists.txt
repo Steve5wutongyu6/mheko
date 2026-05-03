@@ -47,7 +47,7 @@ macro(hunter_add_package_safe)
     message("pkg_conf_path: '$ENV{PKG_CONFIG_PATH}', pkg_conf_libdir: '$ENV{PKG_CONFIG_LIBDIR}'")
 endmacro()
 
-project(nheko LANGUAGES CXX C)
+project(mheko LANGUAGES CXX C)
 
 option(USE_BUNDLED_SPDLOG "Use the bundled version of spdlog." ${HUNTER_ENABLED})
 option(USE_BUNDLED_FMT "Use the bundled version of {fmt}." ${HUNTER_ENABLED})
@@ -126,9 +126,9 @@ set(PROJECT_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH})
 fix_project_version()
 
 # Set additional project information
-set(COMPANY "Nheko")
+set(COMPANY "Mheko")
 set(COPYRIGHT "Copyright (c) 2024 Nheko Contributors")
-set(IDENTIFIER "im.nheko.Nheko")
+set(IDENTIFIER "im.mheko.Mheko")
 
 add_project_meta(META_FILES_TO_INCLUDE)
 
@@ -698,22 +698,22 @@ if(ASAN)
 endif()
 
 if(WIN32)
-    qt_add_executable(nheko WIN32 ${OS_BUNDLE} ${NHEKO_DEPS})
-    target_compile_definitions(nheko PRIVATE _WIN32_WINNT=0x0601 NOMINMAX WIN32_LEAN_AND_MEAN STRICT)
+    qt_add_executable(mheko WIN32 ${OS_BUNDLE} ${NHEKO_DEPS})
+    target_compile_definitions(mheko PRIVATE _WIN32_WINNT=0x0601 NOMINMAX WIN32_LEAN_AND_MEAN STRICT)
 else()
-    qt_add_executable(nheko ${OS_BUNDLE} ${NHEKO_DEPS})
+    qt_add_executable(mheko ${OS_BUNDLE} ${NHEKO_DEPS})
 
     if(APPLE)
-        set_target_properties(nheko PROPERTIES MACOSX_BUNDLE_INFO_PLIST
+        set_target_properties(mheko PROPERTIES MACOSX_BUNDLE_INFO_PLIST
             "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in")
     endif()
 
     if(HAVE_BACKTRACE_SYMBOLS_FD AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
-        set_target_properties(nheko PROPERTIES ENABLE_EXPORTS ON)
+        set_target_properties(mheko PROPERTIES ENABLE_EXPORTS ON)
     endif()
 endif()
 
-set_target_properties(nheko
+set_target_properties(mheko
     PROPERTIES
         CMAKE_SKIP_INSTALL_RPATH TRUE
         AUTOMOC ON)
@@ -838,7 +838,7 @@ set(QML_SOURCES
     resources/qml/delegates/EncryptionEnabled.qml
     resources/qml/ui/TimelineEffects.qml
 )
-qt_add_qml_module(nheko
+qt_add_qml_module(mheko
     URI im.nheko
     NO_RESOURCE_TARGET_PATH
     RESOURCE_PREFIX "/"
@@ -862,61 +862,61 @@ qt_add_qml_module(nheko
 # Bundle translations
 #
 file(GLOB LANG_TS_SRC "${CMAKE_CURRENT_SOURCE_DIR}/resources/langs/*.ts")
-qt_add_translations(nheko RESOURCE_PREFIX "/translations" TS_FILES
+qt_add_translations(mheko RESOURCE_PREFIX "/translations" TS_FILES
     ${LANG_TS_SRC} SOURCES ${QML_SOURCES} ${SRC_FILES})
 
 if(WIN32)
-    target_compile_definitions(nheko PRIVATE WIN32_LEAN_AND_MEAN)
-    target_link_libraries(nheko PRIVATE Qt6::DBus)
+    target_compile_definitions(mheko PRIVATE WIN32_LEAN_AND_MEAN)
+    target_link_libraries(mheko PRIVATE Qt6::DBus)
     if(MSVC)
-        target_compile_options(nheko PUBLIC "/Zc:__cplusplus")
+        target_compile_options(mheko PUBLIC "/Zc:__cplusplus")
     endif()
 else()
-    target_link_libraries(nheko PRIVATE Qt6::DBus)
+    target_link_libraries(mheko PRIVATE Qt6::DBus)
     if(FLATPAK)
-        target_compile_definitions(nheko PRIVATE NHEKO_FLATPAK)
+        target_compile_definitions(mheko PRIVATE NHEKO_FLATPAK)
     endif()
 endif()
 
-target_include_directories(nheko PRIVATE src includes src/timeline/ src/ui/ src/encryption/ src/voip/)
+target_include_directories(mheko PRIVATE src includes src/timeline/ src/ui/ src/encryption/ src/voip/)
 
 if(USE_BUNDLED_CPPHTTPLIB)
-    target_include_directories(nheko PRIVATE third_party/cpp-httplib-0.5.12)
-    target_sources(nheko PRIVATE third_party/cpp-httplib-0.5.12/httplib.h)
+    target_include_directories(mheko PRIVATE third_party/cpp-httplib-0.5.12)
+    target_sources(mheko PRIVATE third_party/cpp-httplib-0.5.12/httplib.h)
 else()
     find_package(httplib REQUIRED)
-    target_link_libraries(nheko PRIVATE httplib::httplib)
+    target_link_libraries(mheko PRIVATE httplib::httplib)
 endif()
 
 if(USE_BUNDLED_BLURHASH)
-    target_include_directories(nheko PRIVATE third_party/blurhash)
+    target_include_directories(mheko PRIVATE third_party/blurhash)
     set(BLURHASH_SRC_FILES
         third_party/blurhash/blurhash.cpp
         third_party/blurhash/blurhash.hpp
     )
-    target_sources(nheko PRIVATE ${BLURHASH_SRC_FILES})
+    target_sources(mheko PRIVATE ${BLURHASH_SRC_FILES})
 else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(blurhash REQUIRED IMPORTED_TARGET blurhash)
-    target_link_libraries(nheko PRIVATE PkgConfig::blurhash)
+    target_link_libraries(mheko PRIVATE PkgConfig::blurhash)
 endif()
 
 # Fixup bundled keychain include dirs
 if(USE_BUNDLED_QTKEYCHAIN)
-    target_include_directories(nheko PRIVATE ${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR})
+    target_include_directories(mheko PRIVATE ${qt6keychain_SOURCE_DIR} ${qt6keychain_BINARY_DIR})
 endif()
 if(USE_BUNDLED_KDSINGLEAPPLICATION)
-    target_include_directories(nheko PRIVATE ${kdsingleapplication_SOURCE_DIR} ${kdsingleapplication_BINARY_DIR})
+    target_include_directories(mheko PRIVATE ${kdsingleapplication_SOURCE_DIR} ${kdsingleapplication_BINARY_DIR})
 endif()
 
 if(NOT JSON_ImplicitConversions)
     set_target_properties(nlohmann_json::nlohmann_json PROPERTIES
         INTERFACE_COMPILE_DEFINITIONS "JSON_USE_IMPLICIT_CONVERSIONS=\$<BOOL:OFF>;JSON_DIAGNOSTICS=\$<BOOL:OFF>"
     )
-    target_compile_definitions(nheko PUBLIC JSON_USE_IMPLICIT_CONVERSIONS=0)
+    target_compile_definitions(mheko PUBLIC JSON_USE_IMPLICIT_CONVERSIONS=0)
 endif()
 
-target_link_libraries(nheko PRIVATE
+target_link_libraries(mheko PRIVATE
     ${COEURL_TARGET_NAME}
     MatrixClient::MatrixClient
     cmark::cmark
@@ -937,11 +937,11 @@ target_link_libraries(nheko PRIVATE
     
 if(UNIX)
     # for wayland activation tokens
-    target_link_libraries(nheko PRIVATE Qt::GuiPrivate)
+    target_link_libraries(mheko PRIVATE Qt::GuiPrivate)
 endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
-    target_precompile_headers(nheko
+    target_precompile_headers(mheko
         PRIVATE
         <string>
         <algorithm>
@@ -949,29 +949,29 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
 endif()
 
 if(TARGET PkgConfig::GSTREAMER)
-    target_link_libraries(nheko PRIVATE PkgConfig::GSTREAMER)
-    target_compile_definitions(nheko PRIVATE GSTREAMER_AVAILABLE)
+    target_link_libraries(mheko PRIVATE PkgConfig::GSTREAMER)
+    target_compile_definitions(mheko PRIVATE GSTREAMER_AVAILABLE)
 endif()
 if(TARGET PkgConfig::XCB)
-    target_link_libraries(nheko PRIVATE PkgConfig::XCB)
-    target_compile_definitions(nheko PRIVATE XCB_AVAILABLE)
+    target_link_libraries(mheko PRIVATE PkgConfig::XCB)
+    target_compile_definitions(mheko PRIVATE XCB_AVAILABLE)
 endif()
 
 if(MSVC)
-    target_link_libraries(nheko PRIVATE ntdll)
+    target_link_libraries(mheko PRIVATE ntdll)
 endif()
 
 if(HAIKU)
-    target_link_libraries(nheko PRIVATE network)
+    target_link_libraries(mheko PRIVATE network)
 endif()
 
 if(QML_DEBUGGING)
-    target_compile_definitions(nheko PRIVATE QML_DEBUGGING)
+    target_compile_definitions(mheko PRIVATE QML_DEBUGGING)
 endif()
 
 if(NOT MSVC AND NOT HAIKU)
     if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR CI_BUILD)
-        target_compile_options(nheko PRIVATE "-Werror")
+        target_compile_options(mheko PRIVATE "-Werror")
     endif()
 endif()
 #if(NOT MSVC)
@@ -984,12 +984,12 @@ endif()
 
 # potential workaround for macdeployqt issues
 if(APPLE)
-    install(TARGETS nheko
+    install(TARGETS mheko
         BUNDLE  DESTINATION .
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
     qt_generate_deploy_qml_app_script(
-        TARGET nheko
+        TARGET mheko
         OUTPUT_SCRIPT deploy_script
         NO_UNSUPPORTED_PLATFORM_ERROR
     )
@@ -998,13 +998,13 @@ endif()
 
 if(UNIX AND NOT APPLE)
     if(FLATPAK)
-        set(APPID "im.nheko.Nheko")
-        set_target_properties(nheko PROPERTIES OUTPUT_NAME "${APPID}")
+        set(APPID "im.mheko.Mheko")
+        set_target_properties(mheko PROPERTIES OUTPUT_NAME "${APPID}")
     else()
-        set(APPID "nheko")
+        set(APPID "mheko")
     endif()
 
-    install(TARGETS nheko RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(TARGETS mheko RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
     install(FILES "resources/nheko-16.png" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/16x16/apps" RENAME "${APPID}.png")
     install(FILES "resources/nheko-32.png" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/32x32/apps" RENAME "${APPID}.png")
     install(FILES "resources/nheko-48.png" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/48x48/apps" RENAME "${APPID}.png")
@@ -1013,12 +1013,12 @@ if(UNIX AND NOT APPLE)
     install(FILES "resources/nheko-256.png" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/256x256/apps" RENAME "${APPID}.png")
     install(FILES "resources/nheko-512.png" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/512x512/apps" RENAME "${APPID}.png")
     install(FILES "resources/nheko.svg" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps" RENAME "${APPID}.svg")
-    install(FILES "resources/_nheko" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/zsh/site-functions")
+    install(FILES "resources/_nheko" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/zsh/site-functions" RENAME "_mheko")
 
-    configure_file("resources/nheko.desktop.in" "resources/nheko.desktop" @ONLY)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/resources/nheko.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" RENAME "${APPID}.desktop")
-    configure_file("resources/nheko.appdata.xml.in" "resources/nheko.appdata.xml" @ONLY)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/resources/nheko.appdata.xml" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/metainfo" RENAME "${APPID}.appdata.xml")
+    configure_file("resources/nheko.desktop.in" "resources/mheko.desktop" @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/resources/mheko.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications" RENAME "${APPID}.desktop")
+    configure_file("resources/nheko.appdata.xml.in" "resources/mheko.appdata.xml" @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/resources/mheko.appdata.xml" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/metainfo" RENAME "${APPID}.appdata.xml")
 
     if(NOT TARGET uninstall)
         configure_file(

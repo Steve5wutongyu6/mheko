@@ -3,11 +3,11 @@ version: 1
 AppDir:
   path: ./AppDir
   app_info:
-    id: nheko
-    name: nheko
-    icon: nheko
+    id: mheko
+    name: mheko
+    icon: mheko
     version: latest
-    exec: usr/bin/nheko
+    exec: usr/bin/mheko
     exec_args: $@
   runtime:
     env:

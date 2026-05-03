@@ -100,4 +100,4 @@ operator<<(QDBusArgument &arg, const QImage &image);
 const QDBusArgument &
 operator>>(const QDBusArgument &arg, QImage &);
 
-#define NHEKO_DBUS_SERVICE_NAME "im.nheko.Nheko"
+#define NHEKO_DBUS_SERVICE_NAME "im.mheko.Mheko"

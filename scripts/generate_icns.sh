@@ -7,7 +7,7 @@ set -eu
 #
 
 INPUT=$1
-OUTPUT=nheko
+OUTPUT=mheko
 
 filename=$(basename -- "$1")
 extension="${filename##*.}"
