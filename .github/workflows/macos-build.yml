@@ -1,0 +1,113 @@
+name: macOS Build
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: macos-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-macos:
+    runs-on: macos-15
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      QT_VERSION: 6.8.3
+      QT_ARCH: clang_64
+      QT_MODULES: qtlocation qtimageformats qtmultimedia qtpositioning qtshadertools
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_COMPRESS: "true"
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_SLOPPINESS: time_macros
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Restore Homebrew downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/macos-build.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-brew-
+
+      - name: Install Homebrew packages
+        run: brew install pkg-config ccache openssl@3
+
+      - name: Install aqtinstall
+        run: python -m pip install --upgrade pip aqtinstall
+
+      - name: Restore Qt SDK cache
+        id: cache-qt
+        uses: actions/cache@v4
+        with:
+          path: ~/Qt/${{ env.QT_VERSION }}
+          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ env.QT_ARCH }}
+
+      - name: Install Qt SDK
+        if: steps.cache-qt.outputs.cache-hit != 'true'
+        run: aqt install-qt --outputdir "$HOME/Qt" mac desktop "$QT_VERSION" "$QT_ARCH" -m $QT_MODULES
+
+      - name: Restore Hunter cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.hunter
+          key: ${{ runner.os }}-hunter-${{ hashFiles('CMakeLists.txt', 'toolchain.cmake', '.ci/macos/build.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-hunter-
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-${{ github.ref_name }}-${{ hashFiles('CMakeLists.txt', 'toolchain.cmake', '.ci/macos/build.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ github.ref_name }}-
+            ${{ runner.os }}-ccache-
+
+      - name: Build nheko.app
+        env:
+          NHEKO_QT_ROOT: $HOME/Qt/${{ env.QT_VERSION }}/macos
+          NHEKO_HUNTER_ROOT: $HOME/.hunter
+          NHEKO_CMAKE_EXTRA_ARGS: -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          OPENSSL_ROOT_DIR: ${{ runner.temp }}/openssl-root
+        run: |
+          mkdir -p "$CCACHE_DIR"
+          ccache --zero-stats || true
+          OPENSSL_PREFIX="$(brew --prefix openssl@3)"
+          mkdir -p "$OPENSSL_ROOT_DIR"
+          ln -sfn "$OPENSSL_PREFIX/include" "$OPENSSL_ROOT_DIR/include"
+          ln -sfn "$OPENSSL_PREFIX/lib" "$OPENSSL_ROOT_DIR/lib"
+          export PKG_CONFIG_PATH="$OPENSSL_PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}"
+          ./.ci/macos/build.sh
+
+      - name: Show ccache stats
+        if: always()
+        run: ccache --show-stats || true
+
+      - name: Package app bundle
+        run: ditto -c -k --sequesterRsrc --keepParent nheko.app nheko-macos-${{ github.sha }}.zip
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nheko-macos-${{ github.sha }}
+          path: |
+            nheko.app
+            nheko-macos-${{ github.sha }}.zip
+          if-no-files-found: error
+          retention-days: 14

@@ -118,6 +118,7 @@ compile_commands.json
 *.AppDir
 
 # Artifacts
+/artifacts/
 *.rpm
 *.deb
 package.dir
