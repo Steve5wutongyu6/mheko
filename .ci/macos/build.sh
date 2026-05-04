@@ -77,7 +77,15 @@ if [[ -f "${HOME}/.zshrc" ]]; then
     . "${HOME}/.zshrc"
 fi
 
+if [[ -n "${OPENSSL_ROOT_DIR:-}" ]]; then
+    OPENSSL_ROOT_DIR="$(expand_user_path "${OPENSSL_ROOT_DIR%/}")"
+    export OPENSSL_ROOT_DIR
+fi
+
 CMAKE_PREFIX_PATH="${QT_BASEPATH}/lib/cmake${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}"
+if [[ -n "${OPENSSL_ROOT_DIR:-}" && -d "${OPENSSL_ROOT_DIR}" ]]; then
+    CMAKE_PREFIX_PATH="${OPENSSL_ROOT_DIR}:${CMAKE_PREFIX_PATH}"
+fi
 export CMAKE_PREFIX_PATH
 
 if [[ -z "${CMAKE_BUILD_PARALLEL_LEVEL:-}" ]]; then
@@ -96,6 +104,19 @@ if [[ -n "${NHEKO_CMAKE_EXTRA_ARGS:-}" ]]; then
     # Intentional word splitting to support multiple -D arguments via env.
     # shellcheck disable=SC2206
     EXTRA_CMAKE_ARGS=(${NHEKO_CMAKE_EXTRA_ARGS})
+fi
+if [[ -n "${OPENSSL_ROOT_DIR:-}" && -d "${OPENSSL_ROOT_DIR}" ]]; then
+    EXTRA_CMAKE_ARGS+=(
+        "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}"
+        "-DOPENSSL_INCLUDE_DIR=${OPENSSL_ROOT_DIR}/include"
+    )
+
+    if [[ -f "${OPENSSL_ROOT_DIR}/lib/libssl.dylib" && -f "${OPENSSL_ROOT_DIR}/lib/libcrypto.dylib" ]]; then
+        EXTRA_CMAKE_ARGS+=(
+            "-DOPENSSL_SSL_LIBRARY=${OPENSSL_ROOT_DIR}/lib/libssl.dylib"
+            "-DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_ROOT_DIR}/lib/libcrypto.dylib"
+        )
+    fi
 fi
 
 cmake -GNinja -S. -Bbuild \

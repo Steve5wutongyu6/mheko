@@ -7,6 +7,19 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish the packaged build to GitHub Releases
+        required: false
+        type: boolean
+        default: false
+      release_name:
+        description: Release title, defaults to mheko_YYYYMMDD_HHMMSS in UTC
+        required: false
+        type: string
+
+permissions:
+  contents: write
 
 concurrency:
   group: macos-build-${{ github.workflow }}-${{ github.ref }}
@@ -47,7 +60,7 @@ jobs:
             ${{ runner.os }}-brew-
 
       - name: Install Homebrew packages
-        run: brew install pkg-config ccache openssl@3
+        run: brew install pkg-config ccache jq openssl@3
 
       - name: Install aqtinstall
         run: |
@@ -103,7 +116,9 @@ jobs:
         run: command -v ccache >/dev/null 2>&1 && ccache --show-stats || true
 
       - name: Package app bundle
-        run: ditto -c -k --sequesterRsrc --keepParent mheko.app mheko-macos-${{ github.sha }}.zip
+        run: |
+          mkdir -p artifacts
+          ditto -c -k --sequesterRsrc --keepParent mheko.app artifacts/mheko-macos-${{ github.sha }}.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -111,6 +126,31 @@ jobs:
           name: mheko-macos-${{ github.sha }}
           path: |
             mheko.app
-            mheko-macos-${{ github.sha }}.zip
+            artifacts/mheko-macos-${{ github.sha }}.zip
           if-no-files-found: error
           retention-days: 14
+
+      - name: Compute release metadata
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
+        run: |
+          build_timestamp="$(date -u +%Y%m%d_%H%M%S)"
+          release_name="${{ inputs.release_name }}"
+          if [ -z "${release_name}" ]; then
+            release_name="mheko_${build_timestamp}"
+          fi
+          {
+            echo "RELEASE_NAME<<EOF"
+            echo "${release_name}"
+            echo "EOF"
+            echo "RELEASE_TAG=macos-build-${build_timestamp}"
+          } >> "$GITHUB_ENV"
+
+      - name: Publish release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ARTIFACTS_DIR: ./artifacts
+          RELEASE_DRAFT: false
+          RELEASE_PRERELEASE: true
+          RELEASE_TARGET_COMMITISH: ${{ github.sha }}
+        run: ./.ci/update-github-release.sh
