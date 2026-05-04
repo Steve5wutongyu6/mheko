@@ -2,10 +2,48 @@
 
 set -euo pipefail
 
+expand_user_path() {
+    local path="$1"
+
+    if [[ "$path" == "~" ]]; then
+        printf '%s\n' "$HOME"
+        return
+    fi
+
+    if [[ "$path" == "~/"* ]]; then
+        printf '%s/%s\n' "$HOME" "${path#~/}"
+        return
+    fi
+
+    if [[ "$path" == '$HOME' || "$path" == '${HOME}' ]]; then
+        printf '%s\n' "$HOME"
+        return
+    fi
+
+    if [[ "$path" == '$HOME/'* ]]; then
+        printf '%s/%s\n' "$HOME" "${path#\$HOME/}"
+        return
+    fi
+
+    if [[ "$path" == '${HOME}/'* ]]; then
+        printf '%s/%s\n' "$HOME" "${path#\$\{HOME\}/}"
+        return
+    fi
+
+    printf '%s\n' "$path"
+}
+
 find_qt_root() {
     if [[ -n "${NHEKO_QT_ROOT:-}" ]]; then
-        printf '%s\n' "${NHEKO_QT_ROOT%/}"
-        return
+        local configured_root
+
+        configured_root="$(expand_user_path "${NHEKO_QT_ROOT%/}")"
+        if [[ -d "${configured_root}" ]]; then
+            printf '%s\n' "${configured_root}"
+            return
+        fi
+
+        echo "Ignoring invalid NHEKO_QT_ROOT: ${NHEKO_QT_ROOT}" >&2
     fi
 
     local matches=()
@@ -52,7 +90,7 @@ fi
 
 export CMAKE_POLICY_VERSION_MINIMUM="3.5"
 
-HUNTER_ROOT="${NHEKO_HUNTER_ROOT:-../.hunter}"
+HUNTER_ROOT="$(expand_user_path "${NHEKO_HUNTER_ROOT:-../.hunter}")"
 EXTRA_CMAKE_ARGS=()
 if [[ -n "${NHEKO_CMAKE_EXTRA_ARGS:-}" ]]; then
     # Intentional word splitting to support multiple -D arguments via env.

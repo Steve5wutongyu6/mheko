@@ -84,13 +84,13 @@ jobs:
 
       - name: Build mheko.app
         env:
-          NHEKO_QT_ROOT: $HOME/Qt/${{ env.QT_VERSION }}/macos
-          NHEKO_HUNTER_ROOT: $HOME/.hunter
           NHEKO_CMAKE_EXTRA_ARGS: -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           OPENSSL_ROOT_DIR: ${{ runner.temp }}/openssl-root
         run: |
           mkdir -p "$CCACHE_DIR"
           command -v ccache >/dev/null 2>&1 && ccache --zero-stats || true
+          export NHEKO_QT_ROOT="$HOME/Qt/${QT_VERSION}/macos"
+          export NHEKO_HUNTER_ROOT="$HOME/.hunter"
           OPENSSL_PREFIX="$(brew --prefix openssl@3)"
           mkdir -p "$OPENSSL_ROOT_DIR"
           ln -sfn "$OPENSSL_PREFIX/include" "$OPENSSL_ROOT_DIR/include"
